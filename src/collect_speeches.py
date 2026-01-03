@@ -7,8 +7,11 @@ import re
 import os
 
 FILE_PATH = 'dataset/vp_discours.json'
+
+## Valid Date range: 1959-01-15 to 2025-12-22
 BEGIN_DATE_STR = "2000-01-01"
-END_DATE_STR = "2000-2-28"
+END_DATE_STR = "2010-12-31"
+FAILURE_FILE = f'logs/failures_{BEGIN_DATE_STR}_to_{END_DATE_STR}.jsonl'
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -50,6 +53,7 @@ class SpeechSpider(scrapy.Spider):
                 'format': 'json',
                 'encoding': 'utf8',
                 'indent': 4,
+                'overwrite': True,
             },
         },
     }
@@ -64,7 +68,6 @@ class SpeechSpider(scrapy.Spider):
         return spider
 
     def start_requests(self):
-        
         self.logger.warning("LOGGER TEST: If you see this, writing to file is working!")
 
         with open(FILE_PATH, 'r', encoding='utf-8') as f:
@@ -94,18 +97,20 @@ class SpeechSpider(scrapy.Spider):
         if not container:
             self.logger.warning(f"Empty content for {response.url}. Retrying...")
             
-            # 200 OK but empty content, retry manually
             retries = response.meta.get('retry_count', 0) + 1
-            if retries <= 5: # Limit manual retries to avoid infinite loops
+            if retries <= 5: 
                 new_request = response.request.copy()
                 new_request.meta['retry_count'] = retries
-                new_request.dont_filter = True # Important: allow Scrapy to visit the same URL again
+                new_request.dont_filter = True 
                 yield new_request
-                return # Stop processing this attempt
+                return 
             else:
                 self.logger.error(f"Gave up on {response.url} after {retries} attempts.")
+                # --- NEW CODE START ---
+                self.log_failure(response.url, "Empty Content (Selector Failed)", response.meta['original_data'])
+                # --- NEW CODE END ---
                 self.pbar.update(1)
-                return 
+                return
             
         if container:
             raw_fragments = container.css('::text').getall()
@@ -116,16 +121,16 @@ class SpeechSpider(scrapy.Spider):
         if clean_fragments:
             last_fragment = clean_fragments[-1]
             
-            # (?i)       -> Case insensitive (matches "Source", "source", "SOURCE")
-            # ^          -> Start of the string
-            # \(?        -> Optional opening parenthesis "("
-            # \s* -> Optional whitespace
-            # source     -> The literal word "source"
-            # \s* -> Optional whitespace before separator
-            # [:.]?      -> Optional separator: colon ":" or dot "."
-            # \s* -> Optional whitespace after separator
-            # (.*)       -> Capture everything else as the content
-            match = re.search(r"(?i)^\(?\s*source\s*[:.]?\s*(.*)", last_fragment)
+            # (?i)      -> Case insensitive (matches "Source", "source", "SOURCE")
+            # ^         -> Start of the string
+            # \(?       -> Optional opening parenthesis "("
+            # \s*       -> Optional whitespace
+            # source    -> The literal word "source"
+            # \s*       -> Optional whitespace before separator
+            # [:.：]?     -> Optional separator: colon ":" or dot "."
+            # \s*       -> Optional whitespace after separator
+            # (.*)      -> Capture everything else as the content
+            match = re.search(r"(?i)^\(?\s*source\s*[:.：]?\s*(.*)", last_fragment)
             
             if match:
                 raw_source = match.group(1)
@@ -135,7 +140,7 @@ class SpeechSpider(scrapy.Spider):
 
         item['source'] = source_text
 
-        item['text'] = "\n".join(clean_fragments)
+        item['texte'] = "\n".join(clean_fragments)
         yield item
     
     def item_scraped(self, item, response, spider):
@@ -145,6 +150,16 @@ class SpeechSpider(scrapy.Spider):
     def spider_closed(self, spider):
         # Clean up the progress bar when finished
         self.pbar.close() 
+    
+    def log_failure(self, url, reason, original_data):
+        failure_record = {
+            "url": url,
+            "reason": reason,
+            "timestamp": datetime.now().isoformat(),
+            "original_data": original_data # Keep this so you can easily retry these later
+        }
+        with open(FAILURE_FILE, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(failure_record, ensure_ascii=False) + "\n")
 
     def handle_error(self, failure):
         request = failure.request
@@ -157,7 +172,10 @@ class SpeechSpider(scrapy.Spider):
             new_request.dont_filter = True
             yield new_request
         else:
-            # Final failure: Update pbar and log
             self.pbar.update(1) 
             self.logger.error(f"Failed completely: {repr(failure)}")
+            
+            # Extract the original data from the request meta if available
+            original_data = request.meta.get('original_data', {})
+            self.log_failure(request.url, f"Network Error: {failure.getErrorMessage()}", original_data)
     
