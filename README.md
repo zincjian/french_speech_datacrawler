@@ -39,24 +39,24 @@ The notebooks/ directory contains tools to inspect the data:
 The crawler outputs a list of dictionary objects. Each dictionary represents a single speech event containing metadata and the full transcript.
 
 Below is the definition of the keys contained in the output JSON:
-| Key | Type | Description |
-| :--- | :--- | :--- |
-| **`id`** | String | The unique identifier for the speech document. |
-| **`titre`** | String | The official title or headline of the speech. |
-| **`url`** | String | The source URL where the full speech was scraped. |
-| **`domaine`** | String | The broad political domain or office of the speaker (e.g., President of the Republic). |
-| **`prononciation`** | Date (ISO) | The date the speech was actually delivered (`YYYY-MM-DD`). |
-| **`intervenants`** | List[Dict] | A list of speakers involved. Contains nested keys for `nom` (name) and `qualite` (official title/role). |
-| **`auteur_moral`** | List | Organizations or institutions credited as the author, if applicable. |
-| **`circonstance`** | String | Contextual description of the event (e.g., "State visit to...", "Interview with..."). |
-| **`type_emetteur`** | String | The category of the entity issuing the speech. |
-| **`type_document`** | String | The format of the speech (e.g., Declaration, Interview, Press Conference). |
-| **`type_media`** | String/Null | The media format if applicable (often null for text-only archives). |
-| **`media`** | String/Null | Link to media files (audio/video) if available. |
-| **`resume`** | String/Null | A short summary or abstract of the speech content. |
-| **`thematiques`** | List[String]| Broad categories or themes associated with the speech (e.g., "International Relations"). |
-| **`descripteurs`** | List[String]| Specific keywords or tags describing the content (e.g., specific countries, laws, or scientific topics). |
-| **`mise_en_ligne`** | Date (ISO) | The date the record was published online. |
-| **`mise_a_jour`** | Date (ISO) | The date the record was last updated. |
-| **`source`** | String/Null | The original source attribution. |
-| **`text`** | String | **The full scraped transcript of the speech.** This includes the body of the address, dialogue, or interview text. |
+| Original Key (French) | English Key | Type | Description |
+| :--- | :--- | :--- | :--- |
+| **`id`** | ID | String | The unique identifier for the speech document. |
+| **`titre`** | Title | String | The official title or headline of the speech. |
+| **`url`** | URL | String | The source URL where the full speech was scraped. |
+| **`domaine`** | Domain | String | The broad political domain or office of the speaker (e.g., President of the Republic). |
+| **`prononciation`** | Date Delivered | Date (ISO) | The date the speech was actually delivered (`YYYY-MM-DD`). |
+| **`intervenants`** | Speakers | List[Dict] | A list of speakers involved. Contains nested keys for `nom` (name) and `qualite` (official title/role). |
+| **`auteur_moral`** | Institutional Author | List | Organizations or institutions credited as the author, if applicable. |
+| **`circonstance`** | Circumstance | String | Contextual description of the event (e.g., "State visit to...", "Interview with..."). |
+| **`type_emetteur`** | Issuer Type | String | The category of the entity issuing the speech. |
+| **`type_document`** | Document Type | String | The format of the speech (e.g., Declaration, Interview, Press Conference). |
+| **`type_media`** | Media Type | String/Null | The media format if applicable (often null for text-only archives). |
+| **`media`** | Media Link | String/Null | Link to media files (audio/video) if available. |
+| **`resume`** | Summary | String/Null | A short summary or abstract of the speech content. |
+| **`thematiques`** | Themes | List[String]| Broad categories or themes associated with the speech (e.g., "International Relations"). |
+| **`descripteurs`** | Descriptors | List[String]| Specific keywords or tags describing the content (e.g., specific countries, laws, or topics). |
+| **`mise_en_ligne`** | Online Date | Date (ISO) | The date the record was published online. |
+| **`mise_a_jour`** | Update Date | Date (ISO) | The date the record was last updated. |
+| **`source`** | Source | String/Null | The original source attribution. |
+| **`text`** | Text | String | **The full scraped transcript of the speech.** This includes the body of the address, dialogue, or interview text. |
