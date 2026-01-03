@@ -16,6 +16,11 @@ french_speech_datacrawler/
 ```
 
 ## Usage
+0. Environment Setup
+Ensuring the needed packages are installed.
+```bash
+pip install -r requirements.txt
+```
 1. Download Metadata
 Initialize the project by downloading the base metadata file (vp_discours.json) from the French government open data portal.
 
@@ -24,7 +29,10 @@ bash download_metadata.sh
 ```
 
 2. Crawl Speeches
-The main crawler is located in src/collect_speeches.py. This script allows you to define a begin date and end date to filter which speeches to scrape. It iterates through the metadata, visits the source URLs, and extracts the full text content.
+The main crawler is located in src/collect_speeches.py. This script allows you to define a begin date and end date to filter which speeches to scrape. It iterates through the metadata, visits the source URLs, and extracts the full text content. Output is an update dictionary with `text` as speech scripts and `source` specified in speeches text.
+- **[IMPORTANT] Default crawling duration**: 2000-01-01 to 2010-12-31
+- The valid duration is between 1959-01-15 to 2025-12-22, feel free to change `BEGIN_DATE_STR`
+`END_DATE_STR` in `collect_speeches.py`
 ```bash
 scrapy runspider ./src/collect_speeches.py
 ```
@@ -36,6 +44,8 @@ The notebooks/ directory contains tools to inspect the data:
 - `postprocessing.ipynb`: Used for cleaning and standardizing the output files.
 
 ## Output Data Schema
+- Dataset Example: [Speeches from 2000 to 2010](https://drive.google.com/file/d/1d0HAm2WS6145lluBPPdEwd6og6mBzKJ6/view?usp=sharing)
+
 The crawler outputs a list of dictionary objects. Each dictionary represents a single speech event containing metadata and the full transcript.
 
 Below is the definition of the keys contained in the output JSON:
@@ -53,10 +63,10 @@ Below is the definition of the keys contained in the output JSON:
 | **`type_document`** | Document Type | String | The format of the speech (e.g., Declaration, Interview, Press Conference). |
 | **`type_media`** | Media Type | String/Null | The media format if applicable (often null for text-only archives). |
 | **`media`** | Media Link | String/Null | Link to media files (audio/video) if available. |
-| **`resume`** | Summary | String/Null | A short summary or abstract of the speech content. |
+| **`resume`** | Summary | String/Null | A short summary or abstract of the speech content. (Removed in the final output, because most of this rows are empty) |
 | **`thematiques`** | Themes | List[String]| Broad categories or themes associated with the speech (e.g., "International Relations"). |
 | **`descripteurs`** | Descriptors | List[String]| Specific keywords or tags describing the content (e.g., specific countries, laws, or topics). |
 | **`mise_en_ligne`** | Online Date | Date (ISO) | The date the record was published online. |
 | **`mise_a_jour`** | Update Date | Date (ISO) | The date the record was last updated. |
 | **`source`** | Source | String/Null | The original source attribution. |
-| **`text`** | Text | String | **The full scraped transcript of the speech.** This includes the body of the address, dialogue, or interview text. |
+| **`texte`** | Text | String | **The full scraped transcript of the speech.** This includes the body of the address, dialogue, or interview text. |
