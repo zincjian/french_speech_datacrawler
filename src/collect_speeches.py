@@ -10,7 +10,7 @@ FILE_PATH = 'dataset/vp_discours.json'
 
 ## Valid Date range: 1959-01-15 to 2025-12-22
 BEGIN_DATE_STR = "2000-01-01"
-END_DATE_STR = "2010-12-31"
+END_DATE_STR = "2010-12-31" 
 FAILURE_FILE = f'logs/failures_{BEGIN_DATE_STR}_to_{END_DATE_STR}.jsonl'
 
 if not os.path.exists('logs'):

@@ -42,7 +42,14 @@ The notebooks/ directory contains tools to inspect the data:
 
 - `data_investigate.ipynb`: Used to understand the structure of the source `vp_discours.json` file.
 - `postprocessing.ipynb`: Used for cleaning and standardizing the output files.
-
+    - Pipeline Steps:
+        - Key Translation: Renames all JSON keys from French to English for better accessibility (e.g., intervenants $\to$ speakers).
+        - Nested Standardization: Translates nested keys within the speakers list (e.g., qualite $\to$ speaker_role).
+        - Data Cleaning: 
+            - Drop Empty Columns: Automatically removes columns with >95% missing data (e.g., resume/summary is dropped).
+            - Drop Empty Rows: Removes speech records where the scraped text body is null, empty, or whitespace.
+        - Deduplication: specific logic to remove duplicates based on the unique id field.
+        - Export: Saves the final clean dataset as a JSON file (e.g., _clean.json).
 ## Output Data Schema
 - Dataset Example: [Speeches from 2000 to 2010](https://drive.google.com/file/d/1d0HAm2WS6145lluBPPdEwd6og6mBzKJ6/view?usp=sharing)
 
@@ -70,3 +77,4 @@ Below is the definition of the keys contained in the output JSON:
 | **`mise_a_jour`** | Update Date | Date (ISO) | The date the record was last updated. |
 | **`source`** | Source | String/Null | The original source attribution. |
 | **`texte`** | Text | String | **The full scraped transcript of the speech.** This includes the body of the address, dialogue, or interview text. |
+> Note: The `resume` (Summary) field is present in the raw data but is typically dropped during post-processing due to high missing values (>95%).
